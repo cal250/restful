@@ -12,9 +12,11 @@ type Report = {
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api/v1";
 
+/** Renders compliance and operational reports with CSV and PDF export. */
 export function ReportsPage() {
   const { data } = useQuery({ queryKey: ["reports"], queryFn: () => api<Report>("/reports") });
 
+  /** Handles authenticated report file download as a browser save. */
   async function download(path: string, filename: string) {
     const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/reports/${path}`, {

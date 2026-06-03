@@ -5,9 +5,11 @@ import { PageHeader } from "../components/PageHeader";
 import { api } from "../lib/api";
 import type { Role, User } from "../lib/types";
 
+/** Renders the admin user management page for roles and account status. */
 export function UsersPage() {
   const client = useQueryClient();
   const { data = [] } = useQuery({ queryKey: ["users"], queryFn: () => api<User[]>("/users") });
+  /** Handles user role or active-status updates via the API. */
   async function update(id: string, input: { role?: Role; isActive?: boolean }) {
     try {
       await api(`/users/${id}`, { method: "PATCH", body: JSON.stringify(input) });

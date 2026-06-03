@@ -5,6 +5,7 @@ const password = z.string().min(8).max(72)
   .regex(/[a-z]/, "Password must include a lowercase letter")
   .regex(/[0-9]/, "Password must include a number");
 
+/** Validates payloads used when registering a new account. */
 export const registerSchema = z.object({
   email: z.string().email().transform((value) => value.toLowerCase()),
   password,
@@ -12,15 +13,18 @@ export const registerSchema = z.object({
   lastName: z.string().trim().min(1).max(50)
 });
 
+/** Validates credentials submitted for login. */
 export const loginSchema = z.object({
   email: z.string().email().transform((value) => value.toLowerCase()),
   password: z.string().min(1)
 });
 
+/** Validates the email address for a password reset request. */
 export const forgotPasswordSchema = z.object({
   email: z.string({ required_error: "Email is required" }).trim().min(1, "Email is required").email().transform((value) => value.toLowerCase())
 });
 
+/** Validates a reset token and new password pair. */
 export const resetPasswordSchema = z.object({
   token: z.string().min(32),
   password

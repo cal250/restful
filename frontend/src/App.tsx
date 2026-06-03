@@ -14,6 +14,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { UsersPage } from "./pages/UsersPage";
 
+/** Renders public auth routes or the authenticated app shell based on login state. */
 export function App() {
   const { user } = useAuth();
   if (!user) return <Routes><Route path="/login" element={<LoginPage />} /><Route path="/register" element={<RegisterPage />} /><Route path="/forgot-password" element={<ForgotPasswordPage />} /><Route path="/reset-password" element={<ResetPasswordPage />} /><Route path="*" element={<Navigate to="/login" />} /></Routes>;

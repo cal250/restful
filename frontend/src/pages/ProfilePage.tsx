@@ -36,10 +36,12 @@ type PasswordForm = z.infer<typeof passwordSchema>;
 
 const inputClass = "mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-fire focus:ring-2 focus:ring-red-100";
 
+/** Returns a human-readable label for a user role. */
 function roleLabel(role: User["role"]) {
   return role === "ADMIN" ? "Administrator" : role === "INSPECTOR" ? "Inspector" : "User";
 }
 
+/** Renders the user profile page for account, password, and recovery settings. */
 export function ProfilePage() {
   const { user, syncUser } = useAuth();
   const client = useQueryClient();
@@ -65,6 +67,7 @@ export function ProfilePage() {
     profileForm.reset({ firstName: data.firstName, lastName: data.lastName });
   }, [data, profileForm]);
 
+  /** Handles profile name updates and syncs the auth session. */
   async function submitProfile(values: ProfileForm) {
     try {
       const updated = await api<User>("/users/profile", {
@@ -79,6 +82,7 @@ export function ProfilePage() {
     }
   }
 
+  /** Handles password change when the current password is known. */
   async function submitPassword(values: PasswordForm) {
     try {
       await api("/users/profile/change-password", {
@@ -95,6 +99,7 @@ export function ProfilePage() {
     }
   }
 
+  /** Handles password recovery request for the signed-in user's email. */
   async function requestPasswordRecovery() {
     if (!user?.email) return;
     try {

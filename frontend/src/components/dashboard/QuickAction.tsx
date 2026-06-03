@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+/** Renders a navigable quick-action card with icon, title, and description. */
 export function QuickAction({ to, title, description, icon: Icon }: {
   to: string; title: string; description: string; icon: React.ComponentType<{ size?: number }>;
 }) {

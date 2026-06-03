@@ -14,11 +14,13 @@ const schema = z.object({ email: z.string().email(), password: z.string().min(1)
 type FormData = z.infer<typeof schema>;
 const inputClass = "mt-2 w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-3 outline-none transition focus:border-fire focus:ring-2 focus:ring-red-100";
 
+/** Renders the sign-in page with email and password authentication. */
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) });
+  /** Handles sign-in form submission and redirects on success. */
   async function submit(data: FormData) {
     try { await login(data.email, data.password); navigate("/"); } catch (error) { toast.error((error as Error).message); }
   }

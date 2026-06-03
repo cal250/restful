@@ -16,12 +16,14 @@ type RegisterInput = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+/** Provides authentication state and login/logout actions to the app. */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
   });
 
+  /** Handles user sign-in and persists the session token and profile. */
   async function login(email: string, password: string) {
     const result = await api<{ user: User; token: string }>("/auth/login", {
       method: "POST", body: JSON.stringify({ email, password })
@@ -31,6 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(result.user);
   }
 
+  /** Handles new account registration and stores the authenticated session. */
   async function registerAccount(input: RegisterInput) {
     const result = await api<{ user: User; token: string }>("/auth/register", {
       method: "POST", body: JSON.stringify(input)
@@ -40,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(result.user);
   }
 
+  /** Handles sign-out and clears stored credentials. */
   async function logout() {
     try { await api("/auth/logout", { method: "POST" }); } finally {
       localStorage.removeItem("token");
@@ -48,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  /** Updates the cached user profile after profile edits. */
   function syncUser(nextUser: User) {
     localStorage.setItem("user", JSON.stringify(nextUser));
     setUser(nextUser);
@@ -56,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={{ user, login, registerAccount, logout, syncUser }}>{children}</AuthContext.Provider>;
 }
 
+/** Returns the auth context; throws if used outside AuthProvider. */
 export function useAuth() {
   const value = useContext(AuthContext);
   if (!value) throw new Error("AuthProvider is required");

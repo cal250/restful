@@ -1,5 +1,6 @@
 import { reportsRepository } from "./reports.repository.js";
 
+/** Computes day, month, and year start/end bounds from the current date. */
 function periodBounds(now: Date) {
   return {
     day: [new Date(now.getFullYear(), now.getMonth(), now.getDate()), new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)] as const,
@@ -9,6 +10,7 @@ function periodBounds(now: Date) {
 }
 
 export const reportsService = {
+  /** Aggregates inventory, inspection, compliance, and maintenance metrics. */
   async dashboard() {
     const now = new Date();
     const bounds = periodBounds(now);
@@ -29,6 +31,7 @@ export const reportsService = {
     return this.format(values);
   },
 
+  /** Shapes raw query results into grouped dashboard sections. */
   format(values: unknown[]) {
     const [total, daily, monthly, yearly, pending, completed, overdue, expired, upcoming, maintenanceFrequency, recentMaintenance] = values;
     const compliant = Number(total) - Number(expired);

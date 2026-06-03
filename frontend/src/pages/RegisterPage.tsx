@@ -16,10 +16,12 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 const inputClass = "mt-2 w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-3 outline-none transition focus:border-fire focus:ring-2 focus:ring-red-100";
 
+/** Renders the account registration page for new users. */
 export function RegisterPage() {
   const { registerAccount } = useAuth();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) });
+  /** Handles registration form submission and signs the user in. */
   async function submit(data: FormData) {
     try { await registerAccount(data); toast.success("Account created"); navigate("/"); } catch (error) { toast.error((error as Error).message); }
   }

@@ -10,6 +10,7 @@ const descriptions = {
   USER: "View extinguisher status, schedule inspections, and follow inspection history."
 };
 
+/** Renders the role-specific home dashboard for the signed-in user. */
 export function DashboardPage() {
   const { user } = useAuth();
   return <><PageHeader title={`${user?.role === "ADMIN" ? "Admin" : user?.role === "INSPECTOR" ? "Inspector" : "User"} Dashboard`} description={descriptions[user!.role]} />{user?.role === "ADMIN" ? <AdminDashboard /> : user?.role === "INSPECTOR" ? <InspectorDashboard /> : <UserDashboard />}</>;

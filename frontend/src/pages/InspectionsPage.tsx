@@ -9,6 +9,7 @@ import { StatusBadge } from "../components/StatusBadge";
 import { api } from "../lib/api";
 import type { Extinguisher, Inspection } from "../lib/types";
 
+/** Renders the inspections list with scheduling and result recording. */
 export function InspectionsPage() {
   const client = useQueryClient();
   const { user } = useAuth();
@@ -18,10 +19,12 @@ export function InspectionsPage() {
   const [result, setResult] = useState({ status: "COMPLETED", result: "", notes: "" });
   const { data = [] } = useQuery({ queryKey: ["inspections"], queryFn: () => api<Inspection[]>("/inspections") });
   const { data: extinguishers = [] } = useQuery({ queryKey: ["extinguishers"], queryFn: () => api<Extinguisher[]>("/extinguishers") });
+  /** Handles new inspection scheduling form submission. */
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     try { await api("/inspections", { method: "POST", body: JSON.stringify(form) }); toast.success("Inspection scheduled"); setOpen(false); client.invalidateQueries({ queryKey: ["inspections"] }); } catch (error) { toast.error((error as Error).message); }
   }
+  /** Handles inspection result and status updates for a selected inspection. */
   async function saveResult(event: React.FormEvent) {
     event.preventDefault();
     try { await api(`/inspections/${selected!.id}`, { method: "PATCH", body: JSON.stringify(result) }); toast.success("Inspection result saved"); setSelected(null); client.invalidateQueries({ queryKey: ["inspections"] }); } catch (error) { toast.error((error as Error).message); }

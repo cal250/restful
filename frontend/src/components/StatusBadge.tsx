@@ -9,6 +9,7 @@ const styles: Record<string, string> = {
   UNDER_MAINTENANCE: "bg-amber-100 text-amber-700"
 };
 
+/** Renders a color-coded status pill for equipment or workflow states. */
 export function StatusBadge({ status }: { status: string }) {
   return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${styles[status] ?? "bg-slate-100"}`}>{status.replaceAll("_", " ")}</span>;
 }

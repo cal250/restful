@@ -13,9 +13,11 @@ import { api } from "../lib/api";
 const schema = z.object({ email: z.string().email() });
 type FormData = z.infer<typeof schema>;
 
+/** Renders the forgot-password request page. */
 export function ForgotPasswordPage() {
   const [resetToken, setResetToken] = useState<string>();
   const { register, handleSubmit, formState: { errors, isSubmitting, isSubmitSuccessful } } = useForm<FormData>({ resolver: zodResolver(schema) });
+  /** Handles password reset email request submission. */
   async function submit(data: FormData) {
     try {
       const result = await api<{ resetToken?: string }>("/auth/forgot-password", { method: "POST", body: JSON.stringify(data) });

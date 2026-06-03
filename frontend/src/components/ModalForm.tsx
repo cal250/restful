@@ -1,3 +1,4 @@
+/** Renders a modal overlay with a titled form or content area. */
 export function ModalForm({ title, children, onClose }: {
   title: string; children: React.ReactNode; onClose(): void;
 }) {

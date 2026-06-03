@@ -5,6 +5,7 @@ import { QuickAction } from "./QuickAction";
 import { api } from "../../lib/api";
 import type { Extinguisher, Inspection, Maintenance } from "../../lib/types";
 
+/** Renders the inspector dashboard with inspection metrics and workspace links. */
 export function InspectorDashboard() {
   const inspections = useQuery({ queryKey: ["inspections"], queryFn: () => api<Inspection[]>("/inspections") }).data ?? [];
   const maintenance = useQuery({ queryKey: ["maintenance"], queryFn: () => api<Maintenance[]>("/maintenance") }).data ?? [];

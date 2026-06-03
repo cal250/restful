@@ -19,10 +19,12 @@ const fields = {
   status: z.nativeEnum(ExtinguisherStatus)
 };
 
+/** Normalizes a date to midnight UTC for day-level comparisons. */
 function startOfDay(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
+/** Returns today's date at midnight UTC. */
 function todayUtc(): Date {
   return startOfDay(new Date());
 }
@@ -51,6 +53,7 @@ export function collectExtinguisherDateIssues(
   return issues;
 }
 
+/** Adds collected date validation issues to a Zod refinement context. */
 function applyExtinguisherDateIssues(
   installationDate: Date,
   expiryDate: Date,

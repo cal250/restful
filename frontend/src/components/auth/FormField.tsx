@@ -1,3 +1,4 @@
+/** Renders a labeled form field with optional validation error text. */
 export function FormField({ label, error, children }: {
   label: string; error?: string; children: React.ReactNode;
 }) {

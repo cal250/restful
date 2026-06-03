@@ -5,6 +5,7 @@ import { QuickAction } from "./QuickAction";
 import { api } from "../../lib/api";
 import type { Extinguisher, Inspection } from "../../lib/types";
 
+/** Renders the standard user dashboard with equipment and inspection summaries. */
 export function UserDashboard() {
   const equipment = useQuery({ queryKey: ["extinguishers"], queryFn: () => api<Extinguisher[]>("/extinguishers") }).data ?? [];
   const inspections = useQuery({ queryKey: ["inspections"], queryFn: () => api<Inspection[]>("/inspections") }).data ?? [];

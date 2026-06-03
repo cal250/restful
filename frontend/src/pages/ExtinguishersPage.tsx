@@ -35,6 +35,7 @@ const REGISTER_STATUSES = ["ACTIVE", "OUT_OF_SERVICE", "UNDER_MAINTENANCE"] as c
 const EDIT_STATUSES = ["ACTIVE", "EXPIRED", "OUT_OF_SERVICE", "UNDER_MAINTENANCE"] as const;
 const TYPE_OPTIONS = ["WATER", "FOAM", "CO2", "DRY_POWDER", "WET_CHEMICAL"] as const;
 
+/** Returns today's date as an ISO date string (YYYY-MM-DD). */
 const today = () => new Date().toISOString().slice(0, 10);
 
 /** Formats ISO dates for display in tables and detail views. */
@@ -65,6 +66,7 @@ function validateExtinguisherForm(form: ExtinguisherForm, isEdit: boolean): stri
   return null;
 }
 
+/** Renders the fire extinguisher inventory search, detail, and admin management page. */
 export function ExtinguishersPage() {
   const { user } = useAuth();
   const client = useQueryClient();

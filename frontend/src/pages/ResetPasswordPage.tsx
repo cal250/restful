@@ -22,12 +22,14 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
+/** Renders the password reset page using a token and new password. */
 export function ResetPasswordPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema), defaultValues: { token: params.get("token") ?? "" }
   });
+  /** Handles password reset form submission and redirects to login. */
   async function submit(data: FormData) {
     try {
       await api("/auth/reset-password", {

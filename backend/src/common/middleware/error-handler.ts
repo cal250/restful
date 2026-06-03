@@ -3,6 +3,7 @@ import { ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
 import { AppError } from "../errors/app-error.js";
 
+/** Maps application, validation, and database errors to HTTP responses. */
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   if (error instanceof AppError) {
     res.status(error.statusCode).json({ success: false, message: error.message, code: error.code });

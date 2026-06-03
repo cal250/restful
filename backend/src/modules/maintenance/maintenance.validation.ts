@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+/** Validates payloads used when logging a maintenance action. */
 export const createMaintenanceSchema = z.object({
   extinguisherId: z.string().uuid(),
   actionTaken: z.string().trim().min(1).max(1000),
@@ -9,7 +10,10 @@ export const createMaintenanceSchema = z.object({
   maintenanceDate: z.coerce.date()
 });
 
+/** Validates a maintenance record UUID route parameter. */
 export const maintenanceIdSchema = z.object({ id: z.string().uuid() });
+
+/** Validates optional list filters such as extinguisher ID. */
 export const maintenanceQuerySchema = z.object({ extinguisherId: z.string().uuid().optional() });
 
 export type CreateMaintenanceInput = z.infer<typeof createMaintenanceSchema>;

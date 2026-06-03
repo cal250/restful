@@ -5,11 +5,13 @@ import { LoginInput, RegisterInput } from "./auth.validation.js";
 import { passwordService } from "./password.service.js";
 import { tokenService } from "./token.service.js";
 
+/** Strips sensitive fields and returns only safe user attributes. */
 function toSafeUser(user: SafeUser): SafeUser {
   const { id, email, firstName, lastName, role } = user;
   return { id, email, firstName, lastName, role };
 }
 
+/** Creates a signed access token, persists the session, and returns auth payload. */
 async function authResult(user: SafeUser): Promise<AuthResult> {
   const tokenId = tokenService.createTokenId();
   const token = tokenService.signAccessToken(user.id, user.role, tokenId);
@@ -18,6 +20,7 @@ async function authResult(user: SafeUser): Promise<AuthResult> {
 }
 
 export const authService = {
+  /** Registers a new user account and returns an authenticated session. */
   async register(input: RegisterInput): Promise<AuthResult> {
     const existing = await authRepository.findUserByEmail(input.email);
     if (existing) throw new AppError("Email already exists", 409, "USER_EMAIL_EXISTS");
@@ -27,6 +30,7 @@ export const authService = {
     return authResult(user);
   },
 
+  /** Validates credentials and returns an authenticated session. */
   async login(input: LoginInput): Promise<AuthResult> {
     const user = await authRepository.findUserByEmail(input.email);
     const valid = user && await passwordService.verify(input.password, user.passwordHash);
@@ -35,6 +39,7 @@ export const authService = {
     return authResult(user);
   },
 
+  /** Creates a password reset token when the email matches an existing user. */
   async forgotPassword(email: string): Promise<string | undefined> {
     const user = await authRepository.findUserByEmail(email);
     if (!user) return undefined;
@@ -44,6 +49,7 @@ export const authService = {
     return token;
   },
 
+  /** Applies a new password using a valid, unexpired reset token. */
   async resetPassword(token: string, password: string): Promise<void> {
     const record = await authRepository.findResetToken(tokenService.hashResetToken(token));
     const invalid = !record || record.usedAt || record.expiresAt <= new Date();
@@ -51,6 +57,7 @@ export const authService = {
     await authRepository.resetPassword(record.userId, record.id, await passwordService.hash(password));
   },
 
+  /** Revokes the active session associated with the given token ID. */
   async logout(tokenId: string): Promise<void> {
     await authRepository.revokeSession(tokenId);
   }

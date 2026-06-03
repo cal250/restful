@@ -8,6 +8,7 @@ import { PageHeader } from "../components/PageHeader";
 import { api } from "../lib/api";
 import type { Extinguisher, Maintenance } from "../lib/types";
 
+/** Renders the maintenance log list and entry form for inspectors and admins. */
 export function MaintenancePage() {
   const { user } = useAuth();
   const client = useQueryClient();
@@ -15,6 +16,7 @@ export function MaintenancePage() {
   const [form, setForm] = useState({ extinguisherId: "", actionTaken: "", issuesIdentified: "", recommendations: "", notes: "", maintenanceDate: "" });
   const { data = [] } = useQuery({ queryKey: ["maintenance"], queryFn: () => api<Maintenance[]>("/maintenance") });
   const { data: extinguishers = [] } = useQuery({ queryKey: ["extinguishers"], queryFn: () => api<Extinguisher[]>("/extinguishers") });
+  /** Handles new maintenance record form submission. */
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     try { await api("/maintenance", { method: "POST", body: JSON.stringify(form) }); toast.success("Maintenance logged"); setOpen(false); client.invalidateQueries({ queryKey: ["maintenance"] }); } catch (error) { toast.error((error as Error).message); }

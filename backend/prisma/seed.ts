@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+/** Creates or reuses the default system administrator account. */
 async function seedAdmin() {
   const passwordHash = await bcrypt.hash("ChangeMe123!", 12);
   return prisma.user.upsert({
@@ -18,6 +19,7 @@ async function seedAdmin() {
   });
 }
 
+/** Seeds demo extinguisher, inspection, and maintenance records for local development. */
 async function seedDemoData(): Promise<void> {
   const admin = await seedAdmin();
   const extinguisher = await prisma.fireExtinguisher.upsert({

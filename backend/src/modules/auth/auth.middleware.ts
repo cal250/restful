@@ -4,6 +4,7 @@ import { AppError } from "../../common/errors/app-error.js";
 import { authRepository } from "./auth.repository.js";
 import { tokenService } from "./token.service.js";
 
+/** Verifies the bearer token and attaches the authenticated user to the request. */
 export const authenticate: RequestHandler = async (req, _res, next) => {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
@@ -21,6 +22,7 @@ export const authenticate: RequestHandler = async (req, _res, next) => {
   }
 };
 
+/** Restricts access to requests whose user role is in the allowed list. */
 export function authorize(...roles: Role[]): RequestHandler {
   return (req, _res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {

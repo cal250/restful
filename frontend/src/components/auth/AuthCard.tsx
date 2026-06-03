@@ -1,5 +1,6 @@
 import { Flame } from "lucide-react";
 
+/** Renders a branded card wrapper for authentication forms. */
 export function AuthCard({ title, description, children }: {
   title: string; description: string; children: React.ReactNode;
 }) {
