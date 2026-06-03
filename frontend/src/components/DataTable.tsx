@@ -1,0 +1,3 @@
+export function DataTable({ headers, rows }: { headers: string[]; rows: React.ReactNode[][] }) {
+  return <div className="overflow-x-auto rounded-2xl border bg-white shadow-sm"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr>{headers.map((header) => <th className="px-4 py-3" key={header}>{header}</th>)}</tr></thead><tbody className="divide-y">{rows.length ? rows.map((row, index) => <tr key={index}>{row.map((cell, cellIndex) => <td className="px-4 py-4" key={cellIndex}>{cell}</td>)}</tr>) : <tr><td className="px-4 py-10 text-center text-slate-400" colSpan={headers.length}>No records found</td></tr>}</tbody></table></div>;
+}

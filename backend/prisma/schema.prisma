@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  INSPECTOR
+  USER
+}
+
+enum ExtinguisherStatus {
+  ACTIVE
+  EXPIRED
+  OUT_OF_SERVICE
+  UNDER_MAINTENANCE
+}
+
+enum ExtinguisherType {
+  WATER
+  FOAM
+  CO2
+  DRY_POWDER
+  WET_CHEMICAL
+}
+
+enum InspectionStatus {
+  SCHEDULED
+  COMPLETED
+  OVERDUE
+  CANCELLED
+}
+
+model User {
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  passwordHash        String
+  firstName           String
+  lastName            String
+  role                Role                 @default(USER)
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  passwordResetTokens PasswordResetToken[]
+  sessions            Session[]
+  extinguishers       FireExtinguisher[]   @relation("RegisteredBy")
+  inspections         Inspection[]         @relation("ScheduledBy")
+  maintenanceRecords  MaintenanceRecord[]  @relation("RecordedBy")
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+
+  @@index([role])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  tokenId   String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model FireExtinguisher {
+  id                 String               @id @default(uuid())
+  serialNumber       String               @unique
+  location           String
+  type               ExtinguisherType
+  size               String
+  installationDate   DateTime
+  expiryDate         DateTime
+  status             ExtinguisherStatus   @default(ACTIVE)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  registeredById     String
+  registeredBy       User                 @relation("RegisteredBy", fields: [registeredById], references: [id])
+  inspections        Inspection[]
+  maintenanceRecords MaintenanceRecord[]
+
+  @@index([status])
+  @@index([expiryDate])
+}
+
+model Inspection {
+  id               String           @id @default(uuid())
+  inspectionDate   DateTime
+  inspectionTime   String
+  status           InspectionStatus @default(SCHEDULED)
+  result           String?
+  notes            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  extinguisherId   String
+  extinguisher     FireExtinguisher @relation(fields: [extinguisherId], references: [id], onDelete: Cascade)
+  scheduledById    String
+  scheduledBy      User             @relation("ScheduledBy", fields: [scheduledById], references: [id])
+
+  @@index([status, inspectionDate])
+  @@index([extinguisherId])
+}
+
+model MaintenanceRecord {
+  id               String           @id @default(uuid())
+  actionTaken      String
+  issuesIdentified String?
+  recommendations  String?
+  notes            String?
+  maintenanceDate  DateTime
+  createdAt        DateTime         @default(now())
+  extinguisherId   String
+  extinguisher     FireExtinguisher @relation(fields: [extinguisherId], references: [id], onDelete: Cascade)
+  recordedById     String
+  recordedBy       User             @relation("RecordedBy", fields: [recordedById], references: [id])
+
+  @@index([extinguisherId, maintenanceDate])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([userId, createdAt])
+}
