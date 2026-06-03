@@ -13,4 +13,4 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/backend/dist ./backend/dist
 COPY --from=build /app/backend/package.json ./backend/package.json
 COPY --from=build /app/backend/prisma ./backend/prisma
-CMD ["node", "backend/dist/src/server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy --schema backend/prisma/schema.prisma && node backend/dist/src/server.js"]

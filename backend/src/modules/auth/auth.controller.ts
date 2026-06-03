@@ -2,10 +2,30 @@ import { RequestHandler } from "express";
 import { success } from "../../common/http/api-response.js";
 import { authService } from "./auth.service.js";
 
-/** Registers a new user account and returns auth credentials. */
+function registrationOtpResponse(result: { email: string; expiresInMinutes: number }) {
+  return result;
+}
+
+/** Starts registration by sending a one-time verification code to the email. */
 export const register: RequestHandler = async (req, res, next) => {
   try {
-    res.status(201).json(success(await authService.register(req.body), "Account created"));
+    const result = await authService.register(req.body);
+    res.status(201).json(success(registrationOtpResponse(result), "Verification code sent to your email"));
+  } catch (error) { next(error); }
+};
+
+/** Completes registration after the email OTP has been verified. */
+export const verifyRegistrationOtp: RequestHandler = async (req, res, next) => {
+  try {
+    res.status(201).json(success(await authService.verifyRegistrationOtp(req.body), "Account verified"));
+  } catch (error) { next(error); }
+};
+
+/** Sends a fresh registration OTP for a pending signup. */
+export const resendRegistrationOtp: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await authService.resendRegistrationOtp(req.body.email);
+    res.json(success(registrationOtpResponse(result), "Verification code resent"));
   } catch (error) { next(error); }
 };
 

@@ -45,6 +45,21 @@ export const openapi = {
           token: { type: "string", minLength: 32, example: "paste_the_64_character_reset_token_here" },
           password: { type: "string", minLength: 8, example: "NewSecure1" }
         }
+      },
+      VerifyRegistrationOtpRequest: {
+        type: "object",
+        required: ["email", "otp"],
+        properties: {
+          email: { type: "string", format: "email", example: "user@example.com" },
+          otp: { type: "string", minLength: 6, maxLength: 6, example: "123456" }
+        }
+      },
+      ResendRegistrationOtpRequest: {
+        type: "object",
+        required: ["email"],
+        properties: {
+          email: { type: "string", format: "email", example: "user@example.com" }
+        }
       }
     }
   },
@@ -52,13 +67,38 @@ export const openapi = {
     "/auth/register": {
       post: {
         tags: ["Authentication"],
-        summary: "Register a user account",
-        description: "Creates a USER account. Email addresses must be unique.",
+        summary: "Start user registration",
+        description: "Stores pending signup details and creates a short-lived 6-digit verification code in RegistrationOtp. The code is not returned by the API.",
         requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/RegisterRequest" } } } },
         responses: {
-          "201": { description: "Account created" },
+          "201": { description: "Verification code sent" },
           "400": { description: "Validation failed", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
           "409": { description: "Email already exists", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/verify-registration-otp": {
+      post: {
+        tags: ["Authentication"],
+        summary: "Verify registration OTP",
+        description: "Completes registration after the 6-digit verification code is confirmed.",
+        requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/VerifyRegistrationOtpRequest" } } } },
+        responses: {
+          "201": { description: "Account verified" },
+          "400": { description: "Invalid or expired verification code" },
+          "409": { description: "Email already exists" }
+        }
+      }
+    },
+    "/auth/resend-registration-otp": {
+      post: {
+        tags: ["Authentication"],
+        summary: "Resend registration OTP",
+        description: "Issues a fresh 6-digit verification code for a pending signup.",
+        requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/ResendRegistrationOtpRequest" } } } },
+        responses: {
+          "200": { description: "Verification code resent" },
+          "400": { description: "Invalid or expired verification code" }
         }
       }
     },

@@ -37,5 +37,11 @@ export const tokenService = {
   /** Hashes a reset token for secure storage. */
   hashResetToken(token: string): string {
     return createHash("sha256").update(token).digest("hex");
+  },
+
+  /** Generates a 6-digit registration OTP and its SHA-256 hash. */
+  createRegistrationOtp(): { otp: string } {
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    return { otp };
   }
 };

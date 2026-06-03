@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from "../src/modules/auth/auth.validation.js";
+import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema, verifyRegistrationOtpSchema } from "../src/modules/auth/auth.validation.js";
 
 describe("registerSchema", () => {
   it("normalizes valid registration input", () => {
@@ -30,5 +30,7 @@ describe("registerSchema", () => {
     expect(forgotPasswordSchema.safeParse({ email: "" }).success).toBe(false);
     expect(forgotPasswordSchema.parse({ email: " Admin@Example.COM " }).email).toBe("admin@example.com");
     expect(resetPasswordSchema.safeParse({ token: "x".repeat(32), password: "SecurePass1" }).success).toBe(true);
+    expect(verifyRegistrationOtpSchema.safeParse({ email: "user@example.com", otp: "123456" }).success).toBe(true);
+    expect(verifyRegistrationOtpSchema.safeParse({ email: "user@example.com", otp: "12" }).success).toBe(false);
   });
 });

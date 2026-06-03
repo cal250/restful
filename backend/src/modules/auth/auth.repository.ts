@@ -48,5 +48,46 @@ export const authRepository = {
       prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
       prisma.passwordResetToken.update({ where: { id: tokenId }, data: { usedAt: new Date() } })
     ]);
+  },
+
+  /** Reads a pending registration OTP record by email. */
+  findRegistrationOtp(email: string) {
+    return prisma.registrationOtp.findUnique({ where: { email } });
+  },
+
+  /** Creates or replaces a pending registration OTP record. */
+  upsertRegistrationOtp(data: {
+    email: string;
+    passwordHash: string;
+    firstName: string;
+    lastName: string;
+    otp: string;
+    expiresAt: Date;
+  }) {
+    return prisma.registrationOtp.upsert({
+      where: { email: data.email },
+      update: {
+        passwordHash: data.passwordHash,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        otp: data.otp,
+        expiresAt: data.expiresAt,
+        attempts: 0
+      },
+      create: data
+    });
+  },
+
+  /** Increments failed OTP verification attempts for an email. */
+  incrementRegistrationOtpAttempts(email: string) {
+    return prisma.registrationOtp.update({
+      where: { email },
+      data: { attempts: { increment: 1 } }
+    });
+  },
+
+  /** Removes a pending registration OTP after successful verification. */
+  deleteRegistrationOtp(email: string) {
+    return prisma.registrationOtp.delete({ where: { email } });
   }
 };

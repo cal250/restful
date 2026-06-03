@@ -30,5 +30,17 @@ export const resetPasswordSchema = z.object({
   password
 });
 
+/** Validates the OTP submitted to complete registration. */
+export const verifyRegistrationOtpSchema = z.object({
+  email: z.string().email().transform((value) => value.toLowerCase()),
+  otp: z.string().regex(/^\d{6}$/, "Verification code must be a 6-digit number")
+});
+
+/** Validates the email address used to resend a registration OTP. */
+export const resendRegistrationOtpSchema = z.object({
+  email: z.string().email().transform((value) => value.toLowerCase())
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type VerifyRegistrationOtpInput = z.infer<typeof verifyRegistrationOtpSchema>;

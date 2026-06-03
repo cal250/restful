@@ -1,9 +1,12 @@
 import { AppError } from "../../common/errors/app-error.js";
 import { authRepository } from "./auth.repository.js";
 import { AuthResult, SafeUser } from "./auth.types.js";
-import { LoginInput, RegisterInput } from "./auth.validation.js";
+import { LoginInput, RegisterInput, VerifyRegistrationOtpInput } from "./auth.validation.js";
 import { passwordService } from "./password.service.js";
 import { tokenService } from "./token.service.js";
+
+const REGISTRATION_OTP_MINUTES = 10;
+const MAX_REGISTRATION_OTP_ATTEMPTS = 5;
 
 /** Strips sensitive fields and returns only safe user attributes. */
 function toSafeUser(user: SafeUser): SafeUser {
@@ -19,15 +22,79 @@ async function authResult(user: SafeUser): Promise<AuthResult> {
   return { user: toSafeUser(user), token };
 }
 
+/** Loads a pending registration OTP or throws when it is missing or expired. */
+async function requireRegistrationOtp(email: string) {
+  const record = await authRepository.findRegistrationOtp(email);
+  if (!record || record.expiresAt <= new Date()) {
+    throw new AppError("Verification code is invalid or expired", 400, "INVALID_REGISTRATION_OTP");
+  }
+  if (record.attempts >= MAX_REGISTRATION_OTP_ATTEMPTS) {
+    throw new AppError("Too many invalid verification attempts", 429, "REGISTRATION_OTP_LOCKED");
+  }
+  return record;
+}
+
 export const authService = {
-  /** Registers a new user account and returns an authenticated session. */
-  async register(input: RegisterInput): Promise<AuthResult> {
+  /** Stores a pending registration and issues a one-time verification code. */
+  async register(input: RegisterInput) {
     const existing = await authRepository.findUserByEmail(input.email);
     if (existing) throw new AppError("Email already exists", 409, "USER_EMAIL_EXISTS");
-    const passwordHash = await passwordService.hash(input.password);
-    const { email, firstName, lastName } = input;
-    const user = await authRepository.createUser({ email, firstName, lastName, passwordHash });
+
+    const { otp } = tokenService.createRegistrationOtp();
+    const expiresAt = new Date(Date.now() + REGISTRATION_OTP_MINUTES * 60 * 1000);
+    await authRepository.upsertRegistrationOtp({
+      email: input.email,
+      passwordHash: await passwordService.hash(input.password),
+      firstName: input.firstName,
+      lastName: input.lastName,
+      otp,
+      expiresAt
+    });
+
+    return {
+      email: input.email,
+      expiresInMinutes: REGISTRATION_OTP_MINUTES
+    };
+  },
+
+  /** Verifies a registration OTP and creates the user account. */
+  async verifyRegistrationOtp(input: VerifyRegistrationOtpInput): Promise<AuthResult> {
+    const existing = await authRepository.findUserByEmail(input.email);
+    if (existing) throw new AppError("Email already exists", 409, "USER_EMAIL_EXISTS");
+
+    const record = await requireRegistrationOtp(input.email);
+    if (record.otp !== input.otp) {
+      await authRepository.incrementRegistrationOtpAttempts(input.email);
+      throw new AppError("Verification code is invalid or expired", 400, "INVALID_REGISTRATION_OTP");
+    }
+
+    const user = await authRepository.createUser({
+      email: record.email,
+      passwordHash: record.passwordHash,
+      firstName: record.firstName,
+      lastName: record.lastName
+    });
+    await authRepository.deleteRegistrationOtp(record.email);
     return authResult(user);
+  },
+
+  /** Reissues a registration OTP for a pending signup. */
+  async resendRegistrationOtp(email: string) {
+    const record = await requireRegistrationOtp(email);
+    const { otp } = tokenService.createRegistrationOtp();
+    const expiresAt = new Date(Date.now() + REGISTRATION_OTP_MINUTES * 60 * 1000);
+    await authRepository.upsertRegistrationOtp({
+      email: record.email,
+      passwordHash: record.passwordHash,
+      firstName: record.firstName,
+      lastName: record.lastName,
+      otp,
+      expiresAt
+    });
+    return {
+      email: record.email,
+      expiresInMinutes: REGISTRATION_OTP_MINUTES
+    };
   },
 
   /** Validates credentials and returns an authenticated session. */
