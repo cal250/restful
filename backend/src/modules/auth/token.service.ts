@@ -1,4 +1,4 @@
-import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomInt, randomUUID } from "node:crypto";
 import { Role } from "@prisma/client";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { env } from "../../config/env.js";
@@ -39,9 +39,9 @@ export const tokenService = {
     return createHash("sha256").update(token).digest("hex");
   },
 
-  /** Generates a 6-digit registration OTP and its SHA-256 hash. */
+  /** Generates a cryptographically strong 6-digit registration OTP. */
   createRegistrationOtp(): { otp: string } {
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otp = String(randomInt(100000, 1000000));
     return { otp };
   }
 };

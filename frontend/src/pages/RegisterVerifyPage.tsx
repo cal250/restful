@@ -68,7 +68,7 @@ export function RegisterVerifyPage() {
     <AuthLayout>
       <AuthCard
         title="Verify your email"
-        description={`Enter the 6-digit code for ${pendingRegistration.email}. Look it up in Prisma Studio under RegistrationOtp.`}
+        description={`Enter the 6-digit code sent to ${pendingRegistration.email}.`}
       >
         <form className="mt-7 space-y-4" onSubmit={otpForm.handleSubmit(submitOtp)}>
           <FormField label="Verification code" error={otpForm.formState.errors.otp?.message}>
@@ -87,7 +87,7 @@ export function RegisterVerifyPage() {
           </FormField>
 
           <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            The code is stored temporarily in the database and expires after 10 minutes.
+            The code expires after 10 minutes.
           </p>
 
           <button

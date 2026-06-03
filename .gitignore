@@ -6,3 +6,4 @@ coverage/
 *.tsbuildinfo
 backend/prisma/dev.db
 backups/
+.npm-cache/

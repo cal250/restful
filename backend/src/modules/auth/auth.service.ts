@@ -1,4 +1,5 @@
 import { AppError } from "../../common/errors/app-error.js";
+import { emailService } from "../../common/email/email.service.js";
 import { authRepository } from "./auth.repository.js";
 import { AuthResult, SafeUser } from "./auth.types.js";
 import { LoginInput, RegisterInput, VerifyRegistrationOtpInput } from "./auth.validation.js";
@@ -50,6 +51,7 @@ export const authService = {
       otp,
       expiresAt
     });
+    await emailService.sendRegistrationOtp(input.email, otp, REGISTRATION_OTP_MINUTES);
 
     return {
       email: input.email,
@@ -91,6 +93,7 @@ export const authService = {
       otp,
       expiresAt
     });
+    await emailService.sendRegistrationOtp(record.email, otp, REGISTRATION_OTP_MINUTES);
     return {
       email: record.email,
       expiresInMinutes: REGISTRATION_OTP_MINUTES
@@ -113,6 +116,7 @@ export const authService = {
     const { token, tokenHash } = tokenService.createResetToken();
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
     await authRepository.createResetToken(user.id, tokenHash, expiresAt);
+    await emailService.sendPasswordReset(user.email, token);
     return token;
   },
 
